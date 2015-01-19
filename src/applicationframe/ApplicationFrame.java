@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.io.File;
@@ -17,24 +16,26 @@ import javax.swing.JPanel;
 
 public class ApplicationFrame extends JFrame  {
     private Image image;
-
+    private int indexImage = 0;
+    private ImageSet imageSet;
     public ApplicationFrame() {
-        image = readImage("C:\\Users\\Public\\Pictures\\Sample Pictures\\Tulips.jpg");
         addWidgets();
-        setVisible(true);
         setSize(500,500);
         setMinimumSize(new Dimension(250, 250));
         setTitle("Image viewer");
+        pack();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
     }
 
     private void addWidgets() {
         add(createImagePanel());
-        add(createLeftButton(), BorderLayout.WEST);
-        add(createRightButton(), BorderLayout.EAST);
+        add(createButtonPanel(), BorderLayout.SOUTH);
     }
 
     private JPanel createImagePanel() {
+        imageSet = new ImageSet(new PathDialog().getPath());
+        image = readImage(imageSet.getImageFiles()[indexImage].getName());
         return new JPanel() {
             {
                 getContentPane().addComponentListener(createComponentListener());
@@ -66,10 +67,7 @@ public class ApplicationFrame extends JFrame  {
                     public void componentHidden(ComponentEvent e) {
                     }
                 };
-            }
-            
-            
-            
+            }     
         };
     }
 
@@ -83,25 +81,36 @@ public class ApplicationFrame extends JFrame  {
 
     private JButton createLeftButton() {
         JButton left = new JButton("Left image");
-        left.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                image = readImage("C:\\Users\\Public\\Pictures\\Sample Pictures\\Lighthouse.jpg");
-            }
+        left.addActionListener((ActionEvent e) -> {
+            applicationframe.Image imageToDisplay = imageSet.getImageFiles()[indexImage].getPrevious();
+            indexImage = locateImage(imageSet, imageToDisplay);
+            image = readImage(imageSet.getImageFiles()[0].getPrevious().getName());
         });
         return left;
     }
 
     private JButton createRightButton() {
         JButton right = new JButton("Right image");
-        right.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                image = readImage("C:\\Users\\Public\\Pictures\\Sample Pictures\\Koala.jpg");
-            }
+        right.addActionListener((ActionEvent e) -> {
+            applicationframe.Image imageToDisplay = imageSet.getImageFiles()[indexImage].getNext();
+            indexImage = locateImage(imageSet, imageToDisplay);
+            image = readImage(imageSet.getImageFiles()[0].getNext().getName());
         });
         return right;
     }  
+
+    private JPanel createButtonPanel() {
+        JPanel panel = new JPanel();
+        panel.add(createLeftButton(), BorderLayout.WEST);
+        panel.add(createRightButton(), BorderLayout.EAST);
+        return panel;
+    }
+
+    private int locateImage(ImageSet imageSet, applicationframe.Image imageToDisplay) {
+        for (int i = 0; i < imageSet.getImageFiles().length; i++) {
+            if (imageSet.getImageFiles()[i] == imageToDisplay)
+                return i;
+        }
+        return 0;
+    }
 }

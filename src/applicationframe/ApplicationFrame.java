@@ -82,9 +82,9 @@ public class ApplicationFrame extends JFrame  {
     private JButton createLeftButton() {
         JButton left = new JButton("Left image");
         left.addActionListener((ActionEvent e) -> {
-            applicationframe.Image imageToDisplay = imageSet.getImageFiles()[indexImage].getPrevious();
-            indexImage = locateImage(imageSet, imageToDisplay);
-            image = readImage(imageSet.getImageFiles()[0].getPrevious().getName());
+            image = readImage(imageSet.getImageFiles()[indexImage].getPrevious().getName());
+            repaint();
+            indexImage = actualizeIndex(indexImage, imageSet.getImageFiles().length, -1);
         });
         return left;
     }
@@ -92,9 +92,9 @@ public class ApplicationFrame extends JFrame  {
     private JButton createRightButton() {
         JButton right = new JButton("Right image");
         right.addActionListener((ActionEvent e) -> {
-            applicationframe.Image imageToDisplay = imageSet.getImageFiles()[indexImage].getNext();
-            indexImage = locateImage(imageSet, imageToDisplay);
-            image = readImage(imageSet.getImageFiles()[0].getNext().getName());
+            image = readImage(imageSet.getImageFiles()[indexImage].getNext().getName());
+            repaint();
+            indexImage = actualizeIndex(indexImage, imageSet.getImageFiles().length, 1);
         });
         return right;
     }  
@@ -106,11 +106,14 @@ public class ApplicationFrame extends JFrame  {
         return panel;
     }
 
-    private int locateImage(ImageSet imageSet, applicationframe.Image imageToDisplay) {
-        for (int i = 0; i < imageSet.getImageFiles().length; i++) {
-            if (imageSet.getImageFiles()[i] == imageToDisplay)
-                return i;
+    private int actualizeIndex(int indexImage, int length, int position) {
+        if(indexImage+position < 0){
+            return length-1;
         }
-        return 0;
+        if(indexImage+position == length){
+            return 0;
+        }
+        return indexImage+position;
     }
+
 }
